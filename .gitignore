@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+**/protos/*.proto
+**/protos/*.py
+**/service_spec/*.py
