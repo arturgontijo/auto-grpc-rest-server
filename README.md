@@ -3,7 +3,7 @@ Python tool to interface a gRPC API and a REST API, using JSON on requests and r
 
 First clone this repo:
 ```shell script
-git clone https://github.com/arturgontijo/simple-transcoder.git
+git clone --recursive https://github.com/arturgontijo/simple-transcoder.git
 cd simple-transcoder
 ```
 
