@@ -1,4 +1,5 @@
 import sys
+import json
 from pathlib import Path
 import traceback
 
@@ -26,26 +27,31 @@ class TranscoderServer:
             if request.method == "POST":
                 try:
                     if not path:
-                        return self.services_dict
+                        return self.services_dict, 500
         
                     path_list = path.split("/")
                     if not path_list or path_list[0].upper() == "HELP":
-                        return self.services_dict
+                        return self.services_dict, 500
         
                     service = path_list[0]
                     if service not in self.services_dict:
-                        return {"Error": "Invalid gRPC service.", **self.services_dict}
+                        return {"Error": "Invalid gRPC service.", **self.services_dict}, 500
+                    
+                    if request.data:
+                        req = json.loads(request.data)
+                    else:
+                        req = request.json if request.json else request.form.to_dict()
         
                     if len(path_list) > 1:
                         method = path_list[1]
                     else:
-                        method = request.json.get("method", list(self.services_dict[service].keys())[0])
+                        method = req.get("method", list(self.services_dict[service].keys())[0])
         
                     if method not in self.services_dict[service].keys():
-                        return {"Error": "Invalid gRPC method.", **self.services_dict[service]}
+                        return {"Error": "Invalid gRPC method.", **self.services_dict[service]}, 500
         
                     input_message = self.services_dict[service][method]["input"]
-                    input_dict = input_factory(request.json, input_message, self.classes)
+                    input_dict = input_factory(req, input_message, self.classes)
         
                     grpc_input = self.classes[input_message["name"]](**input_dict)
         
@@ -59,9 +65,9 @@ class TranscoderServer:
         
                 except Exception as e:
                     print("{}\n{}".format(e, traceback.print_exc()))
-                    return {"Error": "Invalid gRPC request.", **self.services_dict}
+                    return {"Error": "Invalid gRPC request.", **self.services_dict}, 500
                 
-            return {"Error": "Invalid HTTP request (use POST)."}
+            return {"Error": "Invalid HTTP request (use POST)."}, 500
     
         self.app.run(debug=False,
                      host=self.host,
