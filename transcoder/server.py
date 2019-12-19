@@ -21,10 +21,16 @@ class TranscoderServer:
         self.channel = channel
 
     def serve(self):
-        @self.app.route("/", methods=["POST"])
-        @self.app.route("/<path:path>", methods=["POST"])
+        @self.app.route("/", methods=["GET", "POST"])
+        @self.app.route("/<path:path>", methods=["GET", "POST"])
         def rest_to_grpc(path=None):
-            if request.method == "POST":
+            if request.method == "GET":
+                ret = dict()
+                for s in self.services_dict.keys():
+                    ret[s] = list(self.services_dict[s].keys())
+                return ret, 200
+
+            elif request.method == "POST":
                 try:
                     if not path:
                         return self.services_dict, 500
