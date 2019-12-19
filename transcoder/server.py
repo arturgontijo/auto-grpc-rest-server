@@ -11,10 +11,11 @@ from utils.proto_tools import input_factory, output_factory
 
 
 class TranscoderServer:
-    def __init__(self, host, port, services_dict, classes, stubs, channel):
+    def __init__(self, host, port, ssl_context, services_dict, classes, stubs, channel):
         self.app = Flask(__name__)
         self.host = host
         self.port = port
+        self.ssl_context = ssl_context
         self.services_dict = services_dict
         self.classes = classes
         self.stubs = stubs
@@ -83,6 +84,7 @@ class TranscoderServer:
         self.app.run(debug=False,
                      host=self.host,
                      port=self.port,
+                     ssl_context=self.ssl_context,
                      use_reloader=False,
                      threaded=True,
                      passthrough_errors=True)

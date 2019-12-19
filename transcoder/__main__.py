@@ -37,13 +37,25 @@ if __name__ == '__main__':
                         type=int,
                         default=os.environ.get("TRANSCODER_PORT", 7000),
                         help="Transcoder server port.")
-
+    parser.add_argument("--cert",
+                        type=str,
+                        default=os.environ.get("TRANSCODER_CERT", ""),
+                        help="Path to certificate file.")
+    parser.add_argument("--certkey",
+                        type=str,
+                        default=os.environ.get("TRANSCODER_CERTKEY", ""),
+                        help="Path to cert key.")
     args = parser.parse_args()
+
+    ssl_context = None
+    if os.path.exists(args.cert) and os.path.exists(args.certkey):
+        ssl_context = (args.cert, args.certkey)
 
     _, _, services_dict, classes, stubs = load_proto(args.proto_dir)
 
     rest_server = TranscoderServer(host=args.host,
                                    port=args.port,
+                                   ssl_context=ssl_context,
                                    services_dict=services_dict,
                                    classes=classes,
                                    stubs=stubs,
