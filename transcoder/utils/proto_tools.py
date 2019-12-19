@@ -211,8 +211,8 @@ def get_stubs(module, stubs):
 
 def compile_proto(entry_path, codegen_dir, proto_file=None):
     try:
-        if not os.path.exists(codegen_dir):
-            os.makedirs(codegen_dir)
+        if not os.path.exists(str(codegen_dir)):
+            os.makedirs(str(codegen_dir))
         proto_include = pkg_resources.resource_filename('grpc_tools', '_proto')
 
         compiler_args = [

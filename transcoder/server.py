@@ -24,14 +24,18 @@ class TranscoderServer:
         @self.app.route("/", methods=["GET", "POST"])
         @self.app.route("/<path:path>", methods=["GET", "POST"])
         def rest_to_grpc(path=None):
-            if request.method == "GET":
-                ret = dict()
-                for s in self.services_dict.keys():
-                    ret[s] = list(self.services_dict[s].keys())
-                return ret, 200
-
-            elif request.method == "POST":
+            if request.method in ["GET", "POST"]:
                 try:
+                    req = None
+                    if request.method == "GET":
+                        if not request.args:
+                            ret = dict()
+                            for s in self.services_dict.keys():
+                                ret[s] = list(self.services_dict[s].keys())
+                            return ret, 200
+                        else:
+                            req = request.args.to_dict()
+
                     if not path:
                         return self.services_dict, 500
         
@@ -42,11 +46,12 @@ class TranscoderServer:
                     service = path_list[0]
                     if service not in self.services_dict:
                         return {"Error": "Invalid gRPC service.", **self.services_dict}, 500
-                    
-                    if request.data:
-                        req = json.loads(request.data)
-                    else:
-                        req = request.json if request.json else request.form.to_dict()
+
+                    if not req:
+                        if request.data:
+                            req = json.loads(request.data.decode("utf-8"))
+                        else:
+                            req = request.json if request.json else request.form.to_dict()
         
                     if len(path_list) > 1:
                         method = path_list[1]
