@@ -37,6 +37,9 @@ if __name__ == '__main__':
                         type=int,
                         default=os.environ.get("TRANSCODER_PORT", 7000),
                         help="Transcoder server port.")
+    parser.add_argument("--cors",
+                        action='store_true',
+                        help="Allow CORS (all domains!).")
     parser.add_argument("--cert",
                         type=str,
                         default=os.environ.get("TRANSCODER_CERT", ""),
@@ -59,7 +62,8 @@ if __name__ == '__main__':
                                    services_dict=services_dict,
                                    classes=classes,
                                    stubs=stubs,
-                                   channel=grpc.insecure_channel("{}:{}".format(args.grpc_host, args.grpc_port)))
+                                   channel=grpc.insecure_channel("{}:{}".format(args.grpc_host, args.grpc_port)),
+                                   use_cors=args.cors)
 
     print("\n===== Configurations =====")
     for k, v in vars(args).items():

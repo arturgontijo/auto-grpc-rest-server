@@ -11,7 +11,7 @@ from utils.proto_tools import input_factory, output_factory
 
 
 class TranscoderServer:
-    def __init__(self, host, port, ssl_context, services_dict, classes, stubs, channel):
+    def __init__(self, host, port, ssl_context, services_dict, classes, stubs, channel, use_cors=False):
         self.app = Flask(__name__)
         self.host = host
         self.port = port
@@ -20,6 +20,9 @@ class TranscoderServer:
         self.classes = classes
         self.stubs = stubs
         self.channel = channel
+        if use_cors:
+            from flask_cors import CORS
+            CORS(self.app)
 
     def serve(self):
         @self.app.route("/", methods=["GET", "POST"])
