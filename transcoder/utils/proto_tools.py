@@ -156,10 +156,14 @@ def input_factory(req, input_message, classes):
     for f in req.keys():
         var_type = nested_dict[f]["type"]
         var_label = nested_dict[f]["label"]
-        if var_label == Fd.LABEL_REPEATED:
+        if var_label == Fd.LABEL_REPEATED and var_type == Fd.TYPE_MESSAGE:
             ret[f] = []
             for v in req[f]:
                 ret[f].append(classes[nested_dict[f]["name"]](**input_factory(v, nested_dict[f]["fields"], classes)))
+        elif var_label == Fd.LABEL_REPEATED:
+            ret[f] = []
+            for v in req[f]:
+                ret[f].append(type_converter(v, var_type))
         elif var_type == Fd.TYPE_MESSAGE:
             ret[f] = classes[nested_dict[f]["name"]](**input_factory(req[f], nested_dict[f]["fields"], classes))
         else:
@@ -178,10 +182,14 @@ def output_factory(obj, output_message):
         tmp_obj = getattr(obj, f, None)
         var_type = nested_dict[f]["type"]
         var_label = nested_dict[f]["label"]
-        if var_label == Fd.LABEL_REPEATED:
+        if var_label == Fd.LABEL_REPEATED and var_type == Fd.TYPE_MESSAGE:
             ret[f] = []
             for v in tmp_obj:
                 ret[f].append(output_factory(v, nested_dict[f]["fields"]))
+        elif var_label == Fd.LABEL_REPEATED:
+            ret[f] = []
+            for v in tmp_obj:
+                ret[f].append(type_converter(v, var_type))
         elif var_type == Fd.TYPE_MESSAGE:
             ret[f] = output_factory(tmp_obj, nested_dict[f]["fields"])
         else:

@@ -68,7 +68,7 @@ if __name__ == '__main__':
     print("\n===== Configurations =====")
     for k, v in vars(args).items():
         tabs = "\t"
-        if len(k) < 5:
+        if len(k) < 8:
             tabs = "\t\t"
         print("{}{}{}".format(k, tabs, v))
     print("==========================\n")
