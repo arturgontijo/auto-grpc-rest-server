@@ -73,15 +73,13 @@ class TranscoderServer:
 
                     grpc_input = self.classes[input_message["name"]](**input_dict)
 
-                    channel = grpc.insecure_channel("{}:{}".format(self.grpc_host, self.grpc_port)),
-                    stub = self.stubs[service](channel) if self.stubs[service] else None
-                    method_stub = getattr(stub, method, None)
-                    response = method_stub(grpc_input)
+                    with grpc.insecure_channel("{}:{}".format(self.grpc_host, self.grpc_port)) as channel:
+                        stub = self.stubs[service](channel) if self.stubs[service] else None
+                        method_stub = getattr(stub, method, None)
+                        response = method_stub(grpc_input)
+                        output_message = self.services_dict[service][method]["output"]
+                        output_dict = output_factory(response, output_message)
 
-                    channel.close()
-
-                    output_message = self.services_dict[service][method]["output"]
-                    output_dict = output_factory(response, output_message)
                     return output_dict, 200
 
                 except Exception as e:
