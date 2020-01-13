@@ -3,8 +3,6 @@ import sys
 from pathlib import Path
 import argparse
 
-import grpc
-
 from server import TranscoderServer
 
 
@@ -62,7 +60,8 @@ if __name__ == '__main__':
                                    services_dict=services_dict,
                                    classes=classes,
                                    stubs=stubs,
-                                   channel=grpc.insecure_channel("{}:{}".format(args.grpc_host, args.grpc_port)),
+                                   grpc_host=args.grpc_host,
+                                   grpc_port=args.grpc_port,
                                    use_cors=args.cors)
 
     print("\n===== Configurations =====")
