@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 import argparse
+import json
 
 from server import TranscoderServer
 
@@ -37,7 +38,12 @@ if __name__ == '__main__':
                         help="Transcoder server port.")
     parser.add_argument("--cors",
                         action='store_true',
+                        default=os.environ.get("TRANSCODER_CORS", False),
                         help="Allow CORS (all domains!).")
+    parser.add_argument("--check-input",
+                        type=str,
+                        default=os.environ.get("TRANSCODER_CHECK_INPUT", None),
+                        help="Inputs to make a check call on gRPC server.")
     parser.add_argument("--cert",
                         type=str,
                         default=os.environ.get("TRANSCODER_CERT", ""),
@@ -62,6 +68,7 @@ if __name__ == '__main__':
                                    stubs=stubs,
                                    grpc_host=args.grpc_host,
                                    grpc_port=args.grpc_port,
+                                   check_input=args.check_input,
                                    use_cors=args.cors)
 
     print("\n===== Configurations =====")
@@ -71,5 +78,5 @@ if __name__ == '__main__':
             tabs = "\t\t"
         print("{}{}{}".format(k, tabs, v))
     print("==========================\n")
-
+    
     rest_server.serve()

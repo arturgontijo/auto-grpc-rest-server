@@ -13,7 +13,13 @@ from utils.proto_tools import input_factory, output_factory
 
 
 class TranscoderServer:
-    def __init__(self, host, port, ssl_context, services_dict, classes, stubs, grpc_host, grpc_port, use_cors=False):
+    def __init__(self,
+                 host, port,
+                 ssl_context,
+                 services_dict, classes, stubs,
+                 grpc_host, grpc_port,
+                 check_input=None, use_cors=False):
+
         self.app = Flask(__name__)
         self.host = host
         self.port = port
@@ -23,9 +29,25 @@ class TranscoderServer:
         self.stubs = stubs
         self.grpc_host = grpc_host
         self.grpc_port = grpc_port
+
         if use_cors:
             from flask_cors import CORS
             CORS(self.app)
+
+        # checking if the gRPC service is up
+        if check_input:
+            check_input = json.loads(check_input)
+            self.check(check_input)
+
+    def check(self, check_input):
+        service = list(self.services_dict.keys())[0]
+        method = list(self.services_dict[service].keys())[0]
+        input_message = self.services_dict[service][method]["input"]
+        grpc_input = self.classes[input_message["name"]](**check_input)
+        with grpc.insecure_channel("{}:{}".format(self.grpc_host, self.grpc_port)) as channel:
+            stub = self.stubs[service](channel) if self.stubs[service] else None
+            method_stub = getattr(stub, method, None)
+            method_stub(grpc_input)
 
     def serve(self):
         @self.app.route("/", methods=["GET", "POST"])
