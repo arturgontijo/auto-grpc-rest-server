@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 import argparse
-import json
 
 from server import TranscoderServer
 
@@ -40,10 +39,14 @@ if __name__ == '__main__':
                         action='store_true',
                         default=os.environ.get("TRANSCODER_CORS", False),
                         help="Allow CORS (all domains!).")
-    parser.add_argument("--check-input",
+    parser.add_argument("--grpc-check",
+                        action='store_true',
+                        default=os.environ.get("TRANSCODER_GRPC_CHECK", False),
+                        help="Make a gRPC HeathCheck.")
+    parser.add_argument("--custom-check",
                         type=str,
                         default=os.environ.get("TRANSCODER_CHECK_INPUT", None),
-                        help="Inputs to make a check call on gRPC server.")
+                        help="Inputs to make a custom gRPC check request.")
     parser.add_argument("--cert",
                         type=str,
                         default=os.environ.get("TRANSCODER_CERT", ""),
@@ -68,15 +71,16 @@ if __name__ == '__main__':
                                    stubs=stubs,
                                    grpc_host=args.grpc_host,
                                    grpc_port=args.grpc_port,
-                                   check_input=args.check_input,
+                                   grpc_check=args.grpc_check,
+                                   custom_check=args.custom_check,
                                    use_cors=args.cors)
 
-    print("\n===== Configurations =====")
+    print("\n================== Configurations ==================")
     for k, v in vars(args).items():
         tabs = "\t"
         if len(k) < 8:
             tabs = "\t\t"
         print("{}{}{}".format(k, tabs, v))
-    print("==========================\n")
+    print("====================================================\n")
     
     rest_server.serve()

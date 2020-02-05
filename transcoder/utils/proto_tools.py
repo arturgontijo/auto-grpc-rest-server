@@ -23,7 +23,7 @@ def load_proto(dir_path):
 
     proto_file_list = dir_path.glob("*.proto")
     for proto_file in proto_file_list:
-        compile_proto(entry_path=Path(dir_path), codegen_dir=Path(dir_path), proto_file=proto_file)
+        compile_proto(entry_path=dir_path, codegen_dir=dir_path, proto_file=proto_file)
 
     compiled_proto_list = dir_path.glob("*.py")
     pb_list = []
@@ -199,7 +199,7 @@ def output_factory(obj, output_message):
 
 
 def get_classes(module, classes):
-    for sub_module in dir(module):
+    for sub_module in vars(module):
         c = getattr(module, sub_module, None)
         if getattr(c, "DESCRIPTOR", None):
             if not getattr(c, "sys", None):
@@ -210,7 +210,7 @@ def get_classes(module, classes):
 
 
 def get_stubs(module, stubs):
-    for sub_module in dir(module):
+    for sub_module in vars(module):
         if sub_module.endswith("Stub"):
             service_name = sub_module.replace("Stub", "")
             stubs[service_name] = getattr(module, sub_module, None)

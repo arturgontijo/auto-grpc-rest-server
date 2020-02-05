@@ -4,6 +4,8 @@ from pathlib import Path
 import traceback
 
 import grpc
+from grpc_health.v1 import health_pb2_grpc as heartb_pb2_grpc
+from grpc_health.v1 import health_pb2 as heartb_pb2
 
 from flask import Flask, request
 
@@ -18,7 +20,9 @@ class TranscoderServer:
                  ssl_context,
                  services_dict, classes, stubs,
                  grpc_host, grpc_port,
-                 check_input=None, use_cors=False):
+                 grpc_check=False,
+                 custom_check=None,
+                 use_cors=False):
 
         self.app = Flask(__name__)
         self.host = host
@@ -34,10 +38,12 @@ class TranscoderServer:
             from flask_cors import CORS
             CORS(self.app)
 
-        # checking if the gRPC service is up
-        if check_input:
-            check_input = json.loads(check_input)
+        # checking if the gRPC server is up and running
+        if custom_check:
+            check_input = json.loads(custom_check)
             self.check(check_input)
+        elif grpc_check:
+            self.grpc_health_check()
 
     def check(self, check_input):
         service = list(self.services_dict.keys())[0]
@@ -48,6 +54,11 @@ class TranscoderServer:
             stub = self.stubs[service](channel) if self.stubs[service] else None
             method_stub = getattr(stub, method, None)
             method_stub(grpc_input)
+
+    def grpc_health_check(self):
+        channel = grpc.insecure_channel("{}:{}".format(self.grpc_host, self.grpc_port))
+        stub = heartb_pb2_grpc.HealthStub(channel)
+        stub.Check(heartb_pb2.HealthCheckRequest(service=""), timeout=10)
 
     def serve(self):
         @self.app.route("/", methods=["GET", "POST"])
