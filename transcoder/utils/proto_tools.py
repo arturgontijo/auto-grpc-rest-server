@@ -168,7 +168,7 @@ def input_factory(req, input_message, classes):
             ret[f] = classes[nested_dict[f]["name"]](**input_factory(req[f], nested_dict[f]["fields"], classes))
         else:
             tmp_var = req.get(f, None)
-            ret[f] = type_converter(tmp_var, var_type) if tmp_var else None
+            ret[f] = type_converter(tmp_var, var_type)
     return ret
 
 
@@ -194,7 +194,7 @@ def output_factory(obj, output_message):
             ret[f] = output_factory(tmp_obj, nested_dict[f]["fields"])
         else:
             tmp_var = getattr(obj, f, None)
-            ret[f] = type_converter(tmp_var, var_type) if tmp_var else None
+            ret[f] = type_converter(tmp_var, var_type)
     return ret
 
 
